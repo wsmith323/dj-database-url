@@ -35,20 +35,20 @@ SCHEMES = {
 }
 
 
-def config(env=DEFAULT_ENV, default=None, engine=None):
+def config(env=DEFAULT_ENV, default=None, engine=None, custom_schemes=None):
     """Returns configured DATABASE dictionary from DATABASE_URL."""
 
     config = {}
 
-    s = os.environ.get(env, default)
+    url = os.environ.get(env, default)
 
-    if s:
-        config = parse(s, engine)
+    if url:
+        config = parse(url, engine=engine, custom_schemes=custom_schemes)
 
     return config
 
 
-def parse(url, engine=None):
+def parse(url, engine=None, custom_schemes=None):
     """Parses a database URL."""
 
     if url == 'sqlite://:memory:':
@@ -91,6 +91,8 @@ def parse(url, engine=None):
 
     if engine:
         config['ENGINE'] = engine
+    elif custom_schemes and url.scheme in custom_schemes:
+        config['ENGINE'] = custom_schemes[url.scheme]
     elif url.scheme in SCHEMES:
         config['ENGINE'] = SCHEMES[url.scheme]
 
